@@ -1,12 +1,343 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>My Server</title>
-</head>
-<body>
-    <h1>Hello from my Python Server!</h1>
-    <p>This is the index.html file.</p>
-    <p><a href="/page2.html">Go to Page 2</a></p>
-     <p><a href="/nonexistent.html">Try a nonexistent page</a></p>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FastServe - High Performance HTTP Server</title>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #64748b;
+        --light: #f8fafc;
+        --dark: #0f172a;
+        --success: #10b981;
+        --border: #e2e8f0;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+      }
+
+      body {
+        color: var(--dark);
+        background-color: var(--light);
+        line-height: 1.6;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      header {
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+      }
+
+      nav a {
+        text-decoration: none;
+        color: var(--secondary);
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      nav a:hover {
+        color: var(--primary);
+      }
+
+      .hero {
+        padding: 6rem 0;
+        background: linear-gradient(to right, #f8fafc, #eff6ff);
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        color: var(--dark);
+      }
+
+      .hero p {
+        font-size: 1.25rem;
+        color: var(--secondary);
+        max-width: 700px;
+        margin: 0 auto 2.5rem;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+      }
+
+      .btn-secondary {
+        background-color: white;
+        color: var(--primary);
+        border: 1px solid var(--border);
+        margin-left: 1rem;
+      }
+
+      .btn-secondary:hover {
+        background-color: #f1f5f9;
+      }
+
+      .features {
+        padding: 6rem 0;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.5rem;
+        background-color: #dbeafe;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+      }
+
+      .feature-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .metrics {
+        background-color: var(--dark);
+        color: white;
+        padding: 6rem 0;
+        text-align: center;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 3rem;
+        margin-top: 3rem;
+      }
+
+      .metric-item h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .cta {
+        padding: 6rem 0;
+        text-align: center;
+        background-color: #eff6ff;
+      }
+
+      .cta h2 {
+        margin-bottom: 1.5rem;
+      }
+
+      .cta p {
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
+        color: var(--secondary);
+      }
+
+      footer {
+        background-color: white;
+        padding: 4rem 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+      }
+
+      .footer-column h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .footer-column ul {
+        list-style: none;
+      }
+
+      .footer-column li {
+        margin-bottom: 0.75rem;
+      }
+
+      .footer-column a {
+        text-decoration: none;
+        color: var(--secondary);
+        transition: color 0.2s;
+      }
+
+      .footer-column a:hover {
+        color: var(--primary);
+      }
+
+      .copyright {
+        text-align: center;
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        color: var(--secondary);
+        font-size: 0.875rem;
+      }
+
+      @media (max-width: 768px) {
+        .header-container {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        nav ul {
+          gap: 1rem;
+        }
+
+        .hero h1 {
+          font-size: 2.25rem;
+        }
+
+        .hero p {
+          font-size: 1rem;
+        }
+
+        .btn {
+          display: block;
+          width: 100%;
+          margin-bottom: 1rem;
+        }
+
+        .btn-secondary {
+          margin-left: 0;
+        }
+
+        .section-title {
+          font-size: 1.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-container">
+        <a href="#" class="logo">PythonHttp</a>
+        <nav></nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <h1>Python HTTP Server</h1>
+        <p>
+          HTTP/1.1 server built from scratch in Python using the standard socket
+          and threading libraries. The primary goal of this project was to learn
+          the fundamentals of network programming, the HTTP protocol,
+          concurrency, and low-level server operations without relying on
+          high-level frameworks like Flask or Django.
+        </p>
+        <div>
+          <a href="/files.html" class="btn btn-primary">Files</a>
+          <a href="/readme.html" class="btn btn-secondary"
+            >View Documentation</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="container">
+        <h2 class="section-title">Powerful Features</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>WebSocket Support</h3>
+            <p>
+              First-class support for WebSockets to build real-time applications
+              with bidirectional communication.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer id="footer">
+      <div class="container">
+        <div class="footer-grid"></div>
+        <div class="copyright">
+          &copy; 2025 PythonHttp. All rights reserved.
+        </div>
+      </div>
+    </footer>
+  </body>
 </html>
